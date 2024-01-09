@@ -9,4 +9,4 @@
 
 Другие материалы которые я изучаю:
 
-Хенбук ШАД по ML
+Хенбук ШАД по ML - https://education.yandex.ru/handbook/ml
