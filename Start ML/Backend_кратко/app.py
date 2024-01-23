@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import psycopg2
 from pydantic import BaseModel
 import datetime
@@ -26,6 +26,15 @@ class SimpleUser(BaseModel):
 
 @app.get("/")
 def say_hello():
+    
+#В """мы можем прописать анотацию-документацию которая описывает что делает метод"""
+#Это будет отображатся в .../docs#/... fastapi на нащем url 
+    """
+    say Hello to user
+
+    Returns:
+        string: Hello
+    """
     return "hello"
 
 @app.get("/summ")
@@ -61,3 +70,18 @@ def user_validate(user: SimpleUser):
 #Под капотом fastApi поймет что на вход мы получим json и провалидирует против класса SimpleUser
 #А полученный результат будет экземпляром класса SimpleUser
     return "ok"
+
+
+#Демонстрация обработки ексептов 
+@app.get("/error")
+def show_error(a:int):
+    if a == 5:
+        #Вызываем ексепт
+        raise HTTPException(304)
+    else:
+        return "ok"
+    
+    
+    
+    
+    
