@@ -60,5 +60,4 @@ def all_bookings():
 def user_validate(user: SimpleUser):
 #Под капотом fastApi поймет что на вход мы получим json и провалидирует против класса SimpleUser
 #А полученный результат будет экземпляром класса SimpleUser
-    pass
-    
+    return "ok"
