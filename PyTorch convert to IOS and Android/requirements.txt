@@ -1,0 +1,9 @@
+torch==1.8.1
+torchvision==0.9.1
+numpy==1.19.5
+coremltools==4.1  # Для конвертации модели для iOS
+tensorflow==2.4.1  # Для работы с моделью и конвертации в TensorFlow Lite
+tfcoreml==1.1  # Для прямой конвертации моделей TensorFlow в Core ML (если нужно)
+onnx==1.8.0  # Если используете ONNX для промежуточного представления моделей
+onnx-tf==1.7.0  # Для конвертации ONNX моделей в TensorFlow
+sklearn==1.4.2

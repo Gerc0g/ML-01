@@ -4,33 +4,54 @@ from torch.utils.data import TensorDataset, DataLoader
 
 
 
-'''
-Создадим датасет для тестирования многослойного прецептрона linRegres.py MLPModel
-'''
 def MLPDataset():
+    '''
+    Создадим датасет для тестирования многослойного прецептрона.
+    '''
+    x = torch.linspace(-1, 1, 100).unsqueeze(1)  # Входные данные
+    y = x.pow(2) + 0.2*torch.rand(x.size())  # Выходные данные с небольшим шумом
+    
     '''
     X:
     Тензор из 100 равномерно распределенных точек [-1;1]
     unsqueeze(1) - преобразование тензора с (100,) на (100, 1), те в единичную размерность
-    
+        
     Y:
     Тензор X возводим в квадрат добавляя случайный шум к кажому y
-    
+        
     1.Создаем датасет в интерпритации PyTorch
     2.Создаем DataLoader который облегчает итерацию по датасету. batch_size=5 указывает, 
     что данные будут подаваться в модель пакетами по 5 элементов. shuffle=True гарантирует, 
     что данные будут перемешиваться перед каждой эпохой обучения, что помогает предотвратить переобучение модели, 
     обеспечивая, чтобы порядок данных не влиял на процесс обучения.
     '''
+        
+    dataset = TensorDataset(x, y)  # Создание датасета
+    train_loader = DataLoader(dataset=dataset, batch_size=5, shuffle=True)  # Создание DataLoader'а
+
+    return {'dataset': dataset, 'train_loader': train_loader}  # Возвращаем словарь
+
+
+def MLPTesDataset():
+    '''
+    Создадим тестовый датасет для проверки многослойного прецептрона.
+    '''
+    # Входные данные: используем диапазон от -2 до 2 для изменения распределения
+    x_test = torch.linspace(-2, 2, 100).unsqueeze(1)
+    # Выходные данные: используем кубическую зависимость и добавляем немного больше шума
+    y_test = x_test.pow(3) + 0.3*torch.rand(x_test.size())
     
-    x = torch.linspace(-1, 1, 100).unsqueeze(1)
-    y = x.pow(2) + 0.2*torch.rand(x.size())
+    '''
+    X_test:
+    Тензор из 100 равномерно распределенных точек в диапазоне [-2;2], 
+    изменяющий условия по сравнению с тренировочными данными для проверки обобщения.
     
-    #Создание DataLoader
-    dataset = TensorDataset(x,y)
-    train_loader = DataLoader(dataset=dataset, batch_size=5, shuffle=True)
-    
-    
-    
-    
-print(MLPDataset())
+    Y_test:
+    Тензор X_test, возведенный в куб, с добавлением случайного шума, 
+    чтобы усложнить задачу и проверить способность модели к аппроксимации более сложных зависимостей.
+    '''
+        
+    test_dataset = TensorDataset(x_test, y_test)  # Создание тестового датасета
+    test_loader = DataLoader(dataset=test_dataset, batch_size=5, shuffle=False)  # Создание DataLoader'а для тестового набора
+
+    return {'test_dataset': test_dataset, 'test_loader': test_loader}  # Возвращаем словарь
