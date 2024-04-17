@@ -1,57 +1,65 @@
 import torch
-from torch.utils.data import TensorDataset, DataLoader
 
+class DatasetGenerator:
+    def __init__(self, num_samples=1000, num_outliers=50, outlier_mag=20, distribution='uniform', **kwargs):
+        """
+        Инициализирует объект DatasetGenerator с возможностью добавления аномальных значений.
 
+        Параметры:
+        num_samples (int): Количество образцов данных, которые будут сгенерированы.
+        num_outliers (int): Количество аномальных значений.
+        outlier_mag (float): Величина, на которую аномальные значения отличаются от нормы.
+        distribution (str): Тип распределения входных данных ('uniform', 'normal', 'log_normal', 'exponential', 'gamma').
 
-
-def MLPDataset():
-    '''
-    Создадим датасет для тестирования многослойного прецептрона.
-    '''
-    x = torch.linspace(-1, 1, 100).unsqueeze(1)  # Входные данные
-    y = x.pow(2) + 0.2*torch.rand(x.size())  # Выходные данные с небольшим шумом
-    
-    '''
-    X:
-    Тензор из 100 равномерно распределенных точек [-1;1]
-    unsqueeze(1) - преобразование тензора с (100,) на (100, 1), те в единичную размерность
+        kwargs: Дополнительные параметры для различных распределений.
+        """
+        self.num_samples = num_samples
         
-    Y:
-    Тензор X возводим в квадрат добавляя случайный шум к кажому y
-        
-    1.Создаем датасет в интерпритации PyTorch
-    2.Создаем DataLoader который облегчает итерацию по датасету. batch_size=5 указывает, 
-    что данные будут подаваться в модель пакетами по 5 элементов. shuffle=True гарантирует, 
-    что данные будут перемешиваться перед каждой эпохой обучения, что помогает предотвратить переобучение модели, 
-    обеспечивая, чтобы порядок данных не влиял на процесс обучения.
-    '''
-        
-    dataset = TensorDataset(x, y)  # Создание датасета
-    train_loader = DataLoader(dataset=dataset, batch_size=5, shuffle=True)  # Создание DataLoader'а
+        # Создание данных в соответствии с выбранным распределением
+        if distribution == 'uniform':
+            start_point = kwargs.get('start', 0)
+            end_point = kwargs.get('end', 2)
+            self.x = torch.linspace(start_point, end_point, num_samples).unsqueeze(1)
+        elif distribution == 'normal':
+            mean = kwargs.get('mean', 0)
+            std = kwargs.get('std', 1)
+            self.x = torch.normal(mean, std, size=(num_samples,)).unsqueeze(1)
+        elif distribution == 'log_normal':
+            mean = kwargs.get('mean', 0)
+            std = kwargs.get('std', 1)
+            self.x = torch.exp(torch.normal(mean, std, size=(num_samples,))).unsqueeze(1)
+        elif distribution == 'exponential':
+            rate = kwargs.get('rate', 1)
+            self.x = torch.distributions.Exponential(rate).sample((num_samples,)).unsqueeze(1)
+        elif distribution == 'gamma':
+            shape = kwargs.get('shape', 2)
+            scale = kwargs.get('scale', 1)
+            self.x = torch.distributions.Gamma(shape, scale).sample((num_samples,)).unsqueeze(1)
+        else:
+            raise ValueError("Unsupported distribution type provided.")
 
-    return {'dataset': dataset, 'train_loader': train_loader}  # Возвращаем словарь
+        # Добавление аномалий
+        outlier_indices = torch.randint(0, num_samples, (num_outliers,)).long()
+        outliers = torch.randn(num_outliers, 1) * outlier_mag + torch.mean(self.x)
+        self.x[outlier_indices] = outliers  # Исправленный подход к присвоению аномалий
 
+    def linear_regression(self, a=2.0, b=1.0, noise_variance=1.0):
+        noise = torch.randn(self.x.size()) * noise_variance
+        y = a * self.x + b + noise
+        return self.x, y
 
-def MLPTesDataset():
-    '''
-    Создадим тестовый датасет для проверки многослойного прецептрона.
-    '''
-    # Входные данные: используем диапазон от -2 до 2 для изменения распределения
-    x_test = torch.linspace(-2, 2, 100).unsqueeze(1)
-    # Выходные данные: используем кубическую зависимость и добавляем немного больше шума
-    y_test = x_test.pow(3) + 0.3*torch.rand(x_test.size())
-    
-    '''
-    X_test:
-    Тензор из 100 равномерно распределенных точек в диапазоне [-2;2], 
-    изменяющий условия по сравнению с тренировочными данными для проверки обобщения.
-    
-    Y_test:
-    Тензор X_test, возведенный в куб, с добавлением случайного шума, 
-    чтобы усложнить задачу и проверить способность модели к аппроксимации более сложных зависимостей.
-    '''
-        
-    test_dataset = TensorDataset(x_test, y_test)  # Создание тестового датасета
-    test_loader = DataLoader(dataset=test_dataset, batch_size=5, shuffle=False)  # Создание DataLoader'а для тестового набора
+    def polynomial_regression(self, coefficients=[1, 0, 2], noise_variance=1.0):
+        noise = torch.randn(self.x.size()) * noise_variance
+        y = torch.zeros_like(self.x)
+        for power, coeff in enumerate(coefficients):
+            y += coeff * torch.pow(self.x, power)
+        y += noise
+        return self.x, y
 
-    return {'test_dataset': test_dataset, 'test_loader': test_loader}  # Возвращаем словарь
+    def logistic_regression(self, w=1.0, b=1.0, noise_variance=0.5):
+        linear_combination = w * self.x + b
+        noise = torch.randn(self.x.size()) * noise_variance
+        probability = torch.sigmoid(linear_combination + noise)
+        y = torch.round(probability)
+        return self.x, y
+
