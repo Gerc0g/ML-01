@@ -43,18 +43,3 @@ class LinearRegressionModel(nn.Module):
         Определение прямого прохода через сеть.
         """
         return self.fc(x)
-    
-    
-class LinearRegressionModel(nn.Module):
-    def __init__(self, input_size=1, output_size=1):
-        """
-        Инициализация модели линейной регрессии.
-        """
-        super(LinearRegressionModel, self).__init__()
-        self.fc = nn.Linear(input_size, output_size)  # Единственный линейный слой
-
-    def forward(self, x):
-        """
-        Определение прямого прохода через сеть.
-        """
-        return self.fc(x)

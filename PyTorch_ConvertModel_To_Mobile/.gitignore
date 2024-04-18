@@ -1,4 +1,4 @@
-MyVenv/
+venvConvert/
 .vscode/
 *.log
 *.tmp

@@ -1,0 +1,6 @@
+venvEduc/
+.vscode/
+*.log
+*.tmp
+*.temp
+.venv/
