@@ -1,0 +1,5 @@
+MyVenv/
+.vscode/
+*.log
+*.tmp
+*.temp
