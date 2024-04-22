@@ -1,7 +1,8 @@
 coremltools==7.1
 torchinfo==1.8.0
 torch==2.2.2
-
+pillow
+matplotlib
 
 #attrs             23.2.0
 #cattrs            23.2.3

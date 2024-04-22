@@ -1,5 +1,6 @@
 venvLearn/
 .vscode/
+data/
 *.log
 *.tmp
 *.temp
